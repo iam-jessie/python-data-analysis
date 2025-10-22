@@ -1,33 +1,53 @@
-# ✨ Equity Fund Financial Analysis
-
-This project contains a Python script for cleaning and analyzing the financial performance of 150 U.S. companies from a quarterly dataset. The program was developed to aid an investment company in rebalancing its equity fund holdings by providing clear, data-driven insights.
+# 📊 Equity Fund Quarterly Analysis
 
 ---
 
-## 💎 Core Features
+## 📜 Purpose & Audience
 
-This script automates a full data analysis workflow, performing several key tasks:
+This repository contains a single analysis script, `D598_Analysis.py`, developed for a small investment firm that manages an equity fund composed of 150 U.S. companies.
 
-* **Data Loading & Validation:** Imports the dataset from a CSV file and performs a validation check to identify and report any duplicate records.
-* **State-Level Statistics:** Groups all companies by state and calculates descriptive statistics (mean, median, min, max) for all numeric variables to reveal regional trends.
-* **Conditional Filtering:** Filters the dataset to isolate and display all companies with a negative debt-to-equity ratio, flagging them for further review.
-* **Feature Engineering:** Computes a new 'Debt-to-Income Ratio' for each company using existing financial data.
-* **Robust Error Handling:** Safely handles potential division-by-zero errors during the ratio calculation by assigning `NaN` (Not a Number) where a company's revenue is zero, ensuring computational integrity.
-* **Data Concatenation:** Merges the newly calculated ratio with the original dataset to produce a final, augmented data frame for comprehensive analysis.
+The script is intended for **Fund Managers** and **Research Analysts** who need a quick, reproducible quarterly view of portfolio company performance across states and key financial ratios.
 
 ---
 
-## 🛠️ Requirements
+## 💎 What the Script Does
 
-To run this script, your environment must be configured with the following:
+* **Loads the dataset** (Excel or CSV). The script looks for `D598 Data Set.xlsx` or a CSV fallback named `D598 Data Set.csv`.
+* Reports basic dataset information and displays the first three records for **quick verification**.
+* Detects and reports **duplicate rows**.
+* Computes state-level **descriptive statistics** (mean, median, min, max) for all numeric variables.
+* Identifies companies with **negative Debt-to-Equity ratios** for immediate review.
+* Calculates a **Debt-to-Income ratio** per company, handling zero revenue safely by producing `NaN`.
+* **Appends the new metric** back to the original dataset.
 
-* **Python 3**
-* **pandas** library
-* **numpy** library
+---
 
-You can install these dependencies using the following command in your terminal:
+## 🛠️ Environment & Dependencies
 
-```bash
-pip install pandas
-pip install numpy
+* Python 3.8+
+* pandas
+* numpy
+
+Install dependencies (PowerShell):
+
 ```
+python -m pip install --upgrade pip; python -m pip install pandas numpy
+```
+
+---
+
+## 🚀 How to Run (PowerShell)
+
+1.  Place the data file (`D598 Data Set.xlsx` or the CSV fallback) into the project folder.
+2.  From PowerShell, run:
+
+```
+python .\D598_Analysis.py
+```
+
+---
+
+## 🔮 Assumptions & Notes
+
+* The analysis assumes column names are consistent (e.g., `Business ID`, `Business State`, `Total Revenue`). If column names differ, the script will skip the relevant steps.
+* Debt-to-Income is defined as `Total Long-term Debt / Total Revenue`. Rows with zero revenue have `NaN` for this ratio to avoid misleading infinite values.
