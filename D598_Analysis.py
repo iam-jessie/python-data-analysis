@@ -19,7 +19,7 @@ def print_header(title):
 def main():
     # --- File Loading Logic ---
     data_file_xlsx = "D598 Data Set.xlsx"
-    data_file_csv = "D598 Data Set.xlsx - 1-150 V2.csv"
+    data_file_csv = "D598 Data Set.csv"
 
     if os.path.exists(data_file_xlsx):
         data_path = data_file_xlsx
@@ -39,15 +39,15 @@ def main():
         sys.exit(3)
     
     # --- 1. Initial Data Summary ---
-    print_header("1. Initial Data Summary")
+    print_header("Initial Data Summary")
     print(f"Successfully loaded from: {data_path}")
     print(f"Dimensions: {len(company_data):,} rows, {company_data.shape[1]} columns")
-    print("\nData Sample:")
+    print("\nInitial records displayed (first 3 rows):")
     print(company_data.head(3).to_string())
     
 
     # --- 2. Duplicate Row Check ---
-    print_header("2. Duplicate Row Check")
+    print_header("Duplicate Row Check")
     duplicate_rows = company_data[company_data.duplicated()]
     if duplicate_rows.empty:
         print("Result: No duplicate rows found.")
@@ -57,7 +57,7 @@ def main():
 
 
     # --- 3. Descriptive Statistics by State ---
-    print_header("3. Descriptive Statistics by State")
+    print_header("Descriptive Statistics by State")
     if 'Business State' in company_data.columns:
         numeric_cols = company_data.select_dtypes(include=[np.number]).columns.tolist()
         if not numeric_cols:
@@ -100,14 +100,14 @@ def main():
                         rename_map[col] = col
             human_readable_summary = human_readable_summary.rename(columns=rename_map)
 
-            print("Sample of calculated statistics (first 5 rows):")
+            print("State-level statistics (first 5 records shown):")
             print(human_readable_summary.head(5).to_string(index=False))
     else:
         print("Column 'Business State' not found; skipping state-level summary.")
     
 
     # --- 4. Companies with Negative Debt-to-Equity ---
-    print_header("4. Companies with Negative Debt-to-Equity")
+    print_header("Companies with Negative Debt-to-Equity")
     if 'Debt to Equity' in company_data.columns:
         negative_debt_companies = company_data[company_data['Debt to Equity'] < 0]
         print(f"Result: Found {len(negative_debt_companies)} companies with negative Debt-to-Equity.")
@@ -126,7 +126,7 @@ def main():
 
 
     # --- 5. Debt-to-Income Ratio DataFrame ---
-    print_header("5. New Debt-to-Income DataFrame")
+    print_header("New Debt-to-Income DataFrame")
     if 'Total Revenue' in company_data.columns and 'Total Long-term Debt' in company_data.columns:
         dti_ratio = np.where(
             company_data['Total Revenue'] == 0,
@@ -139,7 +139,7 @@ def main():
         })
 
         debt_to_income_df['Debt-to-Income Ratio'] = debt_to_income_df['Debt-to-Income Ratio'].round(2)
-        print("Sample of the newly created DataFrame:")
+        print("Debt-to-Income ratios computed for all companies (first 5 records shown):")
         print(debt_to_income_df.head().to_string(index=False))
     else:
         debt_to_income_df = None
@@ -147,7 +147,7 @@ def main():
 
 
     # --- 6. Final Augmented Data ---
-    print_header("6. Final Augmented Data")
+    print_header("Final Augmented Data")
     if debt_to_income_df is not None and 'Business ID' in company_data.columns:
         final_data = pd.concat([
             company_data.set_index('Business ID'),
@@ -159,7 +159,7 @@ def main():
         if 'Debt-to-Income Ratio' in final_data.columns:
             final_data['Debt-to-Income Ratio'] = final_data['Debt-to-Income Ratio'].round(2)
 
-        print("Sample of the original data concatenated with the new ratio:")
+        print("Final dataset with Debt-to-Income ratio appended (first 5 records shown):")
         print(final_data[display_cols].head().to_string(index=False))
     else:
         print("Skipping concatenation as prior steps were incomplete.")
