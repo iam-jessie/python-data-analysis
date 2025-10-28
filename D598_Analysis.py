@@ -19,6 +19,13 @@ def print_header(title):
     print("="*80)
 
 
+def trim_outliers(series, lower_percentile=0.01, upper_percentile=0.99):
+    """Helper function to trim outliers based on percentiles."""
+    lower_bound = series.quantile(lower_percentile)
+    upper_bound = series.quantile(upper_percentile)
+    return series[(series >= lower_bound) & (series <= upper_bound)]
+
+
 # Visualization Function
 def create_visualizations(state_summary, company_data, debt_to_income_df):
     sns.set_style("whitegrid")
@@ -38,15 +45,12 @@ def create_visualizations(state_summary, company_data, debt_to_income_df):
         plt.tight_layout()
         plt.show()
 
-    # Histogram: Distribution of Debt to Equity Ratio 
+    # Histogram: Distribution of Debt to Equity Ratio (Trimmed)
     if 'Debt to Equity' in company_data.columns:
-        trimmed_data = company_data['Debt to Equity']
-        lower_bound = trimmed_data.quantile(0.01)
-        upper_bound = trimmed_data.quantile(0.99)
-        trimmed_data = trimmed_data[(trimmed_data >= lower_bound) & (trimmed_data <= upper_bound)]
+        trimmed_data = trim_outliers(company_data['Debt to Equity'])
         plt.figure()
         sns.histplot(trimmed_data, kde=True, color='blue', bins=20)
-        plt.title('Distribution of Debt to Equity Ratio', fontsize=16, fontweight='bold')
+        plt.title(f'Distribution of Debt to Equity Ratio (Trimmed, {len(trimmed_data)} rows)', fontsize=16, fontweight='bold')
         plt.xlabel('Debt to Equity Ratio', fontsize=12)
         plt.ylabel('Frequency', fontsize=12)
         plt.axvline(0, color='red', linestyle='--', linewidth=1.5, label='Zero Line')
@@ -54,15 +58,12 @@ def create_visualizations(state_summary, company_data, debt_to_income_df):
         plt.tight_layout()
         plt.show()
 
-    # Histogram: Distribution of Debt-to-Income Ratio
+    # Histogram: Distribution of Debt-to-Income Ratio (Trimmed)
     if debt_to_income_df is not None and 'Debt-to-Income Ratio' in debt_to_income_df.columns:
-        trimmed_data = debt_to_income_df['Debt-to-Income Ratio']
-        lower_bound = trimmed_data.quantile(0.01)
-        upper_bound = trimmed_data.quantile(0.99)
-        trimmed_data = trimmed_data[(trimmed_data >= lower_bound) & (trimmed_data <= upper_bound)]
+        trimmed_data = trim_outliers(debt_to_income_df['Debt-to-Income Ratio'])
         plt.figure()
         sns.histplot(trimmed_data, kde=True, color='green', bins=20)
-        plt.title('Distribution of Debt-to-Income Ratio', fontsize=16, fontweight='bold')
+        plt.title(f'Distribution of Debt-to-Income Ratio (Trimmed, {len(trimmed_data)} rows)', fontsize=16, fontweight='bold')
         plt.xlabel('Debt-to-Income Ratio', fontsize=12)
         plt.ylabel('Frequency', fontsize=12)
         plt.axvline(trimmed_data.mean(), color='orange', linestyle='--', linewidth=1.5, label='Mean')
@@ -73,11 +74,13 @@ def create_visualizations(state_summary, company_data, debt_to_income_df):
 
     # Scatter Plot: Profit Margin vs. Total Revenue (Log Scale with Outlier Trimming)
     if 'Profit Margin' in company_data.columns and 'Total Revenue' in company_data.columns:
-        trimmed_data = company_data[(company_data['Total Revenue'] > 1_000_000) & (company_data['Total Revenue'] < 10_000_000_000)]
+        trimmed_data = company_data.pipe(
+            lambda df: df[(df['Total Revenue'] > 1_000_000) & (df['Total Revenue'] < 10_000_000_000)]
+        )
         plt.figure()
         sns.scatterplot(data=trimmed_data, x='Total Revenue', y='Profit Margin', alpha=0.7, color='purple', edgecolor='black')
         plt.xscale('log')
-        plt.title('Profit Margin vs. Total Revenue (Log Scale)', fontsize=16, fontweight='bold')
+        plt.title(f'Profit Margin vs. Total Revenue (Log Scale, {len(trimmed_data)} rows)', fontsize=16, fontweight='bold')
         plt.xlabel('Total Revenue (Log Scale)', fontsize=12)
         plt.ylabel('Profit Margin (%)', fontsize=12)
         plt.grid(True, linestyle='--', alpha=0.6)
